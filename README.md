@@ -9,14 +9,17 @@ Code listed below is used for taking very large .nc files provided for ROMS data
 -	NOAA_ROMS_S&T_wrangling – prepping NOAA ROMS salinity data to be used
 -	PreppingLOROMsData_Nitrate_May2026 – prepping Live Ocean Nitrate data to be used
 -	PreppingLOROMsData_Temp_May2026 – prepping Live Ocean Temperature data to be used
+  
 Code listed below is for taking oceanographic data and creating usable metrics from it:
 -	OceanographicProfiles_20132018_NOAASaltJune2025_Final
 -	OceanographicProfiles_LiveOceanNitrate_20132023_Final
 -	OceanographicProfiles_LiveOceanTempMay2025_Final
 -	OceanographicProfiles_NASAKd490_20132023_Final
 -	OceanographicProfiles_NRELWaveMay2025_Final
+  
 Code listed below is for taking biological data and creating usable metrics from it: 
 -	KelpChangeProfile_KW_Dec2025_Final - creates MasterSites_WithKWKelpChangeMetrics_201013to202023_updated.csv
+  
 Code listed below is for doing specific analyses/figures presented in Hamilton et al.
 -	BiologicalSCUBAVariables_2023BarGraphs_March2026_Final  - Requires MasterTrans_WithBiologicalMetrics_2023_updated.csv which is provided.
 -	BiologicalSCUBAVariables_2023UrchinvsKelpGraph_March2026_Final  - Requires MasterTrans_WithBiologicalMetrics_2023_updated.csv which is provided.
