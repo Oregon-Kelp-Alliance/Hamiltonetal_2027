@@ -43,34 +43,37 @@ kw_sites$Region <- c("PortOrford","Depoe","Brookings","Arago","Arago","Brookings
 mod1 <- glmmTMB(Percentage_Of1013 ~ Mean_Kd490_Growing + (1|Region),
               family = tweedie(link = "log"), data = kw_sites)
 summary(mod1)
-#urchin mean: AIC = 168.0, pval = 0.000228 Urchin mean effect = -0.18 +/- 0.05
+AICc(mod1)
+#urchin mean: AICc = 175.5, AIC = 168.0, pval = 0.000228 Urchin mean effect = -0.18 +/- 0.05
   # Intercept is 6.66 +/- 0.55
   #interesting, the random effects are tiny... is that because of the log link? 
   # Urchin med: 168.2, urchin mean + intercept are signif, med effect = -0.21
-#temp: AIC = 173.5, pval = 0.301, est = -1.98 +/- 1.917
-#sal: AIC = 170.7, pval = 0.00657, est = -0.757 +- 0.279..... fascinating...
-#waves: AIC = 174.4, pval = 0.628, est = 0.259 +/ 0.535
-#NO3: AIC = 174.6, pval = 0.925, est = 0.042 +- 0.448
-#Kd: AIC = 174.6, pval = 0.992, est = -0.033 +/- 3.54
+#temp: AICc = 181.0, AIC = 173.5, pval = 0.301, est = -1.98 +/- 1.917
+#sal: AICc = 178.2, AIC = 170.7, pval = 0.00657, est = -0.757 +- 0.279..... fascinating...
+#waves: AICc = 181.9, AIC = 174.4, pval = 0.628, est = 0.259 +/ 0.535
+#NO3: AICc = 182.1, AIC = 174.6, pval = 0.925, est = 0.042 +- 0.448
+#Kd: AICc = 182.1, AIC = 174.6, pval = 0.992, est = -0.033 +/- 3.54
 
 
 #Variables+ urchin mean
-mod1 <- glmmTMB(Percentage_Of1013 ~ P10_growing +urchin_mean + (1|Region),
+mod1 <- glmmTMB(Percentage_Of1013 ~ P90_temp_growing +urchin_mean + (1|Region),
                 family = tweedie(link = "log"), data = kw_sites)
 summary(mod1)
+AICc(mod1)
 plot(resid(mod1))
 mod1
-#Urch + temp: AIC = 169.8, temp pval = 0.609
-#Urch + sal: AIC = 169.4, sal pval = 0.394, doesn't actually improve model....
-#Urch + NO3: AIC = 170.0, N03 pval = 0.869
-#Urch + waves: AIC = 170.0, urc signif, waves not signif
-#Urch + Kd: AIC = 170, urch signif, kd not signif
+#Urch + temp: AICc = Not computing :/, AIC = 169.8, temp pval = 0.609
+#Urch + sal: AICc = 181.4, AIC = 169.4, sal pval = 0.394, doesn't actually improve model....
+#Urch + NO3: AICc = 182.0, AIC = 170.0, N03 pval = 0.869
+#Urch + waves: AICc = 182.0, AIC = 170.0, urc signif, waves not signif
+#Urch + Kd: AICc = 182.0, AIC = 170, urch signif, kd not signif
 
 #All vars
 mod1 <- glmmTMB(Percentage_Of1013 ~ Mean_Kd490 + P90_temp_growing + P10_NO3 + Waves_P90 + P10_growing +urchin_mean + (1|Region),
                 family = tweedie(link = "log"), data = kw_sites)
 summary(mod1)
-#AIC = 173.6, unable to estimate pval for the variables
+AICc(mod1)
+#AICc = 246.9, AIC = 173.6, unable to estimate pval for the variables
 ###################################################################################
 #Make a little figure + table for tweedie GLMM modeling kw percent change and its coefficients
 ################################################################################
@@ -82,7 +85,8 @@ estimate = as.vector(NA)
 ci1 = as.vector(NA)
 ci2 = as.vector(NA)
 pval = as.vector(NA)
-r2 = as.vector(NA)
+r2_marg = as.vector(NA)
+r2_cond = as.vector(NA)
 aic = as.vector(NA)
 
 
@@ -92,8 +96,9 @@ estimate[1] <- summary(mod_urch)$coefficients$cond[2,1]
 ci1[1] <- confint(mod_urch)[2,1]
 ci2[1] <- confint(mod_urch)[2,2]
 pval[1] <- summary(mod_urch)$coefficients$cond[2,4]
-r2[1] <- as.numeric(r2_nakagawa(mod_urch, tolerance = 1e-09)[[2]])
-aic[1] <- summary(mod_urch)$AIC[1]
+r2_marg[1] <- as.numeric(r2_nakagawa(mod_urch, tolerance = 1e-09)[[2]])
+r2_cond[1] <- as.numeric(r2_nakagawa(mod_urch, tolerance = 1e-09)[[1]])
+aic[1] <- AICc(mod_urch)#summary(mod_urch)$AIC[1]
 
 mod_temp  <- glmmTMB(Percentage_Of1013 ~ P90_temp_growing + (1|Region),
                      family = tweedie(link = "log"), data = kw_sites)
@@ -101,8 +106,9 @@ estimate[2] <- summary(mod_temp)$coefficients$cond[2,1]
 ci1[2] <- confint(mod_temp)[2,1]
 ci2[2] <- confint(mod_temp)[2,2]
 pval[2] <- summary(mod_temp)$coefficients$cond[2,4]
-r2[2] <- as.numeric(r2_nakagawa(mod_temp, tolerance = 1e-09)[[2]])
-aic[2] <- summary(mod_temp)$AIC[1]
+r2_marg[2] <- as.numeric(r2_nakagawa(mod_temp, tolerance = 1e-09)[[2]])
+r2_cond[2] <- as.numeric(r2_nakagawa(mod_temp, tolerance = 1e-09)[[1]])
+aic[2] <- AICc(mod_temp)#summary(mod_temp)$AIC[1]
 
 mod_sal  <- glmmTMB(Percentage_Of1013 ~ P10_growing + (1|Region),
                      family = tweedie(link = "log"), data = kw_sites)
@@ -110,8 +116,9 @@ estimate[3] <- summary(mod_sal)$coefficients$cond[2,1]
 ci1[3] <- confint(mod_sal)[2,1]
 ci2[3] <- confint(mod_sal)[2,2]
 pval[3] <- summary(mod_sal)$coefficients$cond[2,4]
-r2[3] <- as.numeric(r2_nakagawa(mod_sal, tolerance = 1e-09)[[2]])
-aic[3] <- summary(mod_sal)$AIC[1]
+r2_marg[3] <- as.numeric(r2_nakagawa(mod_sal, tolerance = 1e-09)[[2]])
+r2_cond[3] <- as.numeric(r2_nakagawa(mod_sal, tolerance = 1e-09)[[1]])
+aic[3] <- AICc(mod_sal)#summary(mod_sal)$AIC[1]
 
 mod_waves  <- glmmTMB(Percentage_Of1013 ~ Waves_P90 + (1|Region),
                      family = tweedie(link = "log"), data = kw_sites)
@@ -119,8 +126,9 @@ estimate[4] <- summary(mod_waves)$coefficients$cond[2,1]
 ci1[4] <- confint(mod_waves)[2,1]
 ci2[4] <- confint(mod_waves)[2,2]
 pval[4] <- summary(mod_waves)$coefficients$cond[2,4]
-r2[4] <- as.numeric(r2_nakagawa(mod_waves, tolerance = 1e-09)[[2]])
-aic[4] <- summary(mod_waves)$AIC[1]
+r2_marg[4] <- as.numeric(r2_nakagawa(mod_waves, tolerance = 1e-09)[[2]])
+r2_cond[4] <- as.numeric(r2_nakagawa(mod_waves, tolerance = 1e-09)[[1]])
+aic[4] <- AICc(mod_waves)#summary(mod_waves)$AIC[1]
 
 mod_no3  <- glmmTMB(Percentage_Of1013 ~ P10_NO3 + (1|Region),
                      family = tweedie(link = "log"), data = kw_sites)
@@ -128,8 +136,9 @@ estimate[5] <- summary(mod_no3)$coefficients$cond[2,1]
 ci1[5] <- confint(mod_no3)[2,1]
 ci2[5] <- confint(mod_no3)[2,2]
 pval[5] <- summary(mod_no3)$coefficients$cond[2,4]
-r2[5] <- as.numeric(r2_nakagawa(mod_no3, tolerance = 1e-09)[[2]])
-aic[5] <- summary(mod_no3)$AIC[1]
+r2_marg[5] <- as.numeric(r2_nakagawa(mod_no3, tolerance = 1e-09)[[2]])
+r2_cond[5] <- as.numeric(r2_nakagawa(mod_no3, tolerance = 1e-09)[[1]])
+aic[5] <- AICc(mod_no3)#summary(mod_no3)$AIC[1]
 
 mod_turb  <- glmmTMB(Percentage_Of1013 ~ Mean_Kd490_Growing + (1|Region),
                       family = tweedie(link = "log"), data = kw_sites)
@@ -137,19 +146,19 @@ estimate[6] <- summary(mod_turb)$coefficients$cond[2,1]
 ci1[6] <- confint(mod_turb)[2,1]
 ci2[6] <- confint(mod_turb)[2,2]
 pval[6] <- summary(mod_turb)$coefficients$cond[2,4]
-r2[6] <- as.numeric(r2_nakagawa(mod_turb, tolerance = 1e-09)[[2]])
-aic[6] <- summary(mod_turb)$AIC[1]
+r2_marg[6] <- signif(as.numeric(r2_nakagawa(mod_turb, tolerance = 1e-09)[[2]]),1)
+r2_cond[6] <- as.numeric(r2_nakagawa(mod_turb, tolerance = 1e-09)[[1]])
+aic[6] <- AICc(mod_turb)#summary(mod_turb)$AIC[1]
 
 df = data.frame("Variable" = vars, "Coefficient" = signif(estimate,3), "Lower CI" = signif(ci1,3), 
-                "Upper CI" = signif(ci2,3), "P-value" = signif(pval,2), "Marg R2" = signif(r2,3), "AIC" = signif(aic,4))
-write.csv(df, "C:/Users/sarah/Documents/Github/ORKA_StatusReport_FollowupPaper/StatusReport_FollowupPaper_Figures/GLMMs/GLMMTable_PercentChangeTweedie.csv")
-library(knitr)
-library(kableExtra)
+                "Upper CI" = signif(ci2,3), "P-value" = signif(pval,2), "Marg R2" = format(signif(r2_marg,3),scientific = FALSE), "Cond R2"= signif(r2_cond,3),"AICc" = signif(aic,4))
+write.csv(df, "C:/Users/sarah/Documents/Github/ORKA_StatusReport_FollowupPaper/StatusReport_FollowupPaper_Figures/GLMMs/GLMMTable_PercentChangeTweedie_Revisions.csv")
+
 kable(df, format = "html")
 df %>%
   kbl() %>%
   column_spec(5, bold = ifelse(df$P.value < 0.05 , TRUE, FALSE)) %>%
-  column_spec(7, bold = ifelse(df$AIC == min(df$AIC) , TRUE, FALSE)) %>%
+  column_spec(8, bold = ifelse(df$AIC == min(df$AIC) , TRUE, FALSE)) %>%
   kable_styling()
 #plot it all out
 p <- ggplot(df, aes(x = estimate, y = vars))+
@@ -160,7 +169,7 @@ p <- ggplot(df, aes(x = estimate, y = vars))+
   annotate("text", x = -2, y = 5, label = "***", size = 6)+
   theme_bw()+
   theme(plot.title = element_text(hjust = 0.5))
-ggsave("C:/Users/sarah/Documents/Github/ORKA_StatusReport_FollowupPaper/StatusReport_FollowupPaper_Figures/GLMMs/GLMMCoefficients_PercentChange.jpeg", plot = p,
+ggsave("C:/Users/sarah/Documents/Github/ORKA_StatusReport_FollowupPaper/StatusReport_FollowupPaper_Figures/GLMMs/GLMMCoefficients_PercentChange_Revisions.jpeg", plot = p,
        width = 7.5, height = 2.5,dpi = 600)
 ################################################################################
 #Figure of modeled urchin/percent change relationship for tweedie GLMM modeling kw percent change
@@ -342,26 +351,29 @@ sites$Region <- c("PortOrford","Depoe","Brookings","Arago","Arago","Brookings",
 
 #Ok start with variable by variable (just going to show with a single variable here and record results of 
 #all below) 
-mod2a <- glmmTMB(kelp_mean_count ~ Mean_Kd490_Growing + (1|Region) ,
+mod2a <- glmmTMB(kelp_mean_count ~ urchin_mean + (1|Region) ,
                 family = nbinom2(link = "log"), data = sites)
 summary(mod2a)
+AICc(mod2a)
 plot(resid(mod2a))
 deviance(mod2a)
-#urchin: AIC = 139.2, urch is signif, estimate = -0.17
-#temp: AIC = 144.4, pval = 0.918, est = 0.229 +- 2.22
-#sal: AIC = 143.9, pval = 0.476, estimate = -0.394 +- 0.552 
-#NO3: AIC = 143.5, pval = 0.346, est = -0.363 +- 0.385
-#waves: AiC = 144, waves are not signif, estimate = 0.33
-#kd: AIC = 143.9, pval = 0.46, estimate = 21.781 +/- 2.41
+#urchin: AICc = 143.7, AIC = 139.2, urch is signif, estimate = -0.17
+#temp: AICc = 148.9, AIC = 144.4, pval = 0.918, est = 0.229 +- 2.22
+#sal: AICc = 148.3, AIC = 143.9, pval = 0.476, estimate = -0.394 +- 0.552 
+#NO3: AICc = 148.0, AIC = 143.5, pval = 0.346, est = -0.363 +- 0.385
+#waves: AICc = 148.6,AiC = 144, waves are not signif, estimate = 0.33
+#kd: AICc = 148.4, AIC = 143.9, pval = 0.46, estimate = 21.781 +/- 2.41
 
 #Urchin mean + each var individually. .
-mod2b <- glmmTMB(kelp_mean_count ~ Mean_Kd490 + urchin_mean + (1|Region),
+mod2b <- glmmTMB(kelp_mean_count ~ P90_temp_growing + urchin_mean + (1|Region),
                 family = nbinom2(link = "log"), data = sites)
 summary(mod2b)
-#Urc + temp: AIC = 140.5, temp not signif. Temp est = 3.3, urch est = -0.2
-#Urch + sal: AIC = 139.8, salinity not signif. Sal est = 0.33, urch est = -0.19
-#Urch + waves: AIC = 138.6, waves almost signif. Wave est = 0.84, urc est = -0.19
-#Urch + Kd: AIC = 141.1,KD not signf. Kd est = -1.1, urch est = -0.17
+AICc(mod2b)
+#Urc + temp: AICc = shit again not converging..., AIC = 140.5, temp not signif. Temp est = 3.3, urch est = -0.2
+#Urch + sal: AICc = 148.6, AIC = 139.8, salinity not signif. Sal est = 0.33, urch est = -0.19
+#urch + NO3: AICc = 147.4, AIC = 139.9, nitrate not signif, no3 est = -0.404, urch est = -0.16
+#Urch + waves: AICc = 146.1, AIC = 138.6, waves almost signif. Wave est = 0.84, urc est = -0.19
+#Urch + Kd: AICc = 148.7, AIC = 141.1,KD not signf. Kd est = -1.1, urch est = -0.17
 
 #All vars
 mod2c <- glmmTMB(kelp_mean_count ~ Mean_Kd490 + P90_temp_growing + P10_NO3 + Waves_P90 + P10_growing +urchin_mean + (1|Region),
@@ -376,7 +388,8 @@ estimate = as.vector(NA)
 ci1 = as.vector(NA)
 ci2 = as.vector(NA)
 pval = as.vector(NA)
-r2 = as.vector(NA)
+r2_marg = as.vector(NA)
+r2_cond = as.vector(NA)
 aic = as.vector(NA)
 
 mod_urch  <- glmmTMB(kelp_mean_count ~ urchin_mean + (1|Region),
@@ -385,8 +398,9 @@ estimate[1] <- summary(mod_urch)$coefficients$cond[2,1]
 ci1[1] <- confint(mod_urch)[2,1]
 ci2[1] <- confint(mod_urch)[2,2]
 pval[1] <- summary(mod_urch)$coefficients$cond[2,4]
-r2[1] <- as.numeric(r2_nakagawa(mod_urch, tolerance = 1e-09)[[2]])
-aic[1] <- summary(mod_urch)$AIC[1]
+r2_marg[1] <- as.numeric(r2_nakagawa(mod_urch, tolerance = 1e-09)[[2]])
+r2_cond[1] <- as.numeric(r2_nakagawa(mod_urch, tolerance = 1e-09)[[1]])
+aic[1] <- AICc(mod_urch)#summary(mod_urch)$AIC[1]
 
 mod_temp  <- glmmTMB(kelp_mean_count ~ P90_temp_growing + (1|Region),
                      family = nbinom2(link = "log"), data = sites)
@@ -394,8 +408,9 @@ estimate[2] <- summary(mod_temp)$coefficients$cond[2,1]
 ci1[2] <- confint(mod_temp)[2,1]
 ci2[2] <- confint(mod_temp)[2,2]
 pval[2] <- summary(mod_temp)$coefficients$cond[2,4]
-r2[2] <- as.numeric(r2_nakagawa(mod_temp, tolerance = 1e-09)[[2]])
-aic[2] <- summary(mod_temp)$AIC[1]
+r2_marg[2] <- as.numeric(r2_nakagawa(mod_temp, tolerance = 1e-09)[[2]])
+r2_cond[2] <- as.numeric(r2_nakagawa(mod_temp, tolerance = 1e-09)[[1]])
+aic[2] <- AICc(mod_temp)#summary(mod_temp)$AIC[1]
 
 mod_sal  <- glmmTMB(kelp_mean_count ~ P10_growing + (1|Region),
                     family = nbinom2(link = "log"), data = sites)
@@ -403,8 +418,9 @@ estimate[3] <- summary(mod_sal)$coefficients$cond[2,1]
 ci1[3] <- confint(mod_sal)[2,1]
 ci2[3] <- confint(mod_sal)[2,2]
 pval[3] <- summary(mod_sal)$coefficients$cond[2,4]
-r2[3] <- as.numeric(r2_nakagawa(mod_sal, tolerance = 1e-16)[[2]])
-aic[3] <- summary(mod_sal)$AIC[1]
+r2_marg[3] <- as.numeric(r2_nakagawa(mod_sal, tolerance = 1e-16)[[2]])
+r2_cond[3] <- as.numeric(r2_nakagawa(mod_sal, tolerance = 1e-16)[[1]])
+aic[3] <- AICc(mod_sal)#summary(mod_sal)$AIC[1]
 
 mod_waves  <- glmmTMB(kelp_mean_count ~ Waves_P90 + (1|Region),
                       family = nbinom2(link = "log"), data = sites)
@@ -412,8 +428,9 @@ estimate[4] <- summary(mod_waves)$coefficients$cond[2,1]
 ci1[4] <- confint(mod_waves)[2,1]
 ci2[4] <- confint(mod_waves)[2,2]
 pval[4] <- summary(mod_waves)$coefficients$cond[2,4]
-r2[4] <- as.numeric(r2_nakagawa(mod_waves, tolerance = 1e-09)[[2]])
-aic[4] <- summary(mod_waves)$AIC[1]
+r2_marg[4] <- as.numeric(r2_nakagawa(mod_waves, tolerance = 1e-09)[[2]])
+r2_cond[4] <- as.numeric(r2_nakagawa(mod_waves, tolerance = 1e-09)[[1]])
+aic[4] <- AICc(mod_waves)#summary(mod_waves)$AIC[1]
 
 mod_no3  <- glmmTMB(kelp_mean_count ~ P10_NO3 + (1|Region),
                      family = nbinom2(link = "log"), data = sites)
@@ -421,8 +438,9 @@ estimate[5] <- summary(mod_no3)$coefficients$cond[2,1]
 ci1[5] <- confint(mod_no3)[2,1]
 ci2[5] <- confint(mod_no3)[2,2]
 pval[5] <- summary(mod_no3)$coefficients$cond[2,4]
-r2[5] <- as.numeric(r2_nakagawa(mod_no3, tolerance = 1e-09)[[2]])
-aic[5] <- summary(mod_no3)$AIC[1]
+r2_marg[5] <- as.numeric(r2_nakagawa(mod_no3, tolerance = 1e-09)[[2]])
+r2_cond[5] <- as.numeric(r2_nakagawa(mod_no3, tolerance = 1e-09)[[1]])
+aic[5] <- AICc(mod_no3)#summary(mod_no3)$AIC[1]
 
 mod_turb  <- glmmTMB(kelp_mean_count ~ Mean_Kd490_Growing + (1|Region),
                      family = nbinom2(link = "log"), data = sites)
@@ -430,9 +448,20 @@ estimate[6] <- summary(mod_turb)$coefficients$cond[2,1]
 ci1[6] <- confint(mod_turb)[2,1]
 ci2[6] <- confint(mod_turb)[2,2]
 pval[6] <- summary(mod_turb)$coefficients$cond[2,4]
-r2[6] <- as.numeric(r2_nakagawa(mod_turb, tolerance = 1e-09)[[2]])
-aic[6] <- summary(mod_turb)$AIC[1]
+r2_marg[6] <- as.numeric(r2_nakagawa(mod_turb, tolerance = 1e-09)[[2]])
+r2_cond[6] <- as.numeric(r2_nakagawa(mod_turb, tolerance = 1e-09)[[1]])
+aic[6] <- AICc(mod_turb)#summary(mod_turb)$AIC[1]
 
+
+#MAKE A TABLE
+df = data.frame("Variable" = vars, "Coefficient" = signif(estimate,3), "Lower CI" = signif(ci1,3), 
+                "Upper CI" = signif(ci2,3), "P-value" = signif(pval,2), "Marg R2" = signif(r2_marg,3), "Cond R2" = signif(r2_cond,3),"AICc" = signif(aic,4))
+write.csv(df, "C:/Users/sarah/Documents/Github/ORKA_StatusReport_FollowupPaper/StatusReport_FollowupPaper_Figures/GLMMs/GLMMTable_KelpCountNBinom.csv")
+df %>%
+  kbl() %>%
+  column_spec(5, bold = ifelse(df$P.value < 0.05 , TRUE, FALSE)) %>%
+  column_spec(8, bold = ifelse(df$AIC == min(df$AIC) , TRUE, FALSE)) %>%
+  kable_styling()
 
 #MAKE A FIGURE
 df = data.frame(vars, estimate, ci1, ci2, pval)
@@ -450,15 +479,7 @@ ggsave("C:/Users/sarah/Documents/Github/ORKA_StatusReport_FollowupPaper/StatusRe
        width = 7.5, height = 2.5,dpi = 600)
 
 
-#MAKE A TABLE
-df = data.frame("Variable" = vars, "Coefficient" = signif(estimate,3), "Lower CI" = signif(ci1,3), 
-                "Upper CI" = signif(ci2,3), "P-value" = signif(pval,2), "Marg R2" = signif(r2,3), "AIC" = signif(aic,4))
-write.csv(df, "C:/Users/sarah/Documents/Github/ORKA_StatusReport_FollowupPaper/StatusReport_FollowupPaper_Figures/GLMMs/GLMMTable_KelpCountNBinom.csv")
-df %>%
-  kbl() %>%
-  column_spec(5, bold = ifelse(df$P.value < 0.05 , TRUE, FALSE)) %>%
-  column_spec(7, bold = ifelse(df$AIC == min(df$AIC) , TRUE, FALSE)) %>%
-  kable_styling()
+
 ################################################################################
 #Figure of modeled urchin/percent change relationship for nbinom GLMM modeling 2023 subtidal kelp count
 #################################################################################
